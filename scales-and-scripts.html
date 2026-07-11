@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scales &amp; Scripts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#241a15; --panel:#2f2219; --panel-2:#392a1f; --edge:#4a3728;
+    --edge-soft:#ffffff14; --brass:#c8933f; --brass-soft:#e6bd72; --inlay:#63a79b;
+    --string:#c9beac; --maple:#f2e8d4; --text:#ece1cd; --text-dim:#a6947c; --prose:#d8ccb6;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 500px at 50% -10%, #2e211a 0%, var(--board) 55%), var(--board);
+    color:var(--text); font-family:'Inter', system-ui, sans-serif; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:30px 18px 72px;}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--brass);margin:0 0 8px;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:40px;line-height:1;margin:0 0 12px;
+    color:var(--maple);letter-spacing:-0.01em;}
+  h1 .amp{color:var(--brass);font-style:italic;font-weight:500;}
+  .sub{font-size:14.5px;line-height:1.6;color:var(--text-dim);margin:0 0 18px;max-width:54ch;}
+  .sub strong{color:var(--prose);font-weight:600;}
+
+  details.setup{border:1px solid var(--edge);border-radius:11px;background:var(--panel);
+    margin:0 0 24px;overflow:hidden;}
+  details.setup summary{list-style:none;cursor:pointer;padding:13px 15px;
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--inlay);
+    display:flex;align-items:center;gap:9px;}
+  details.setup summary::-webkit-details-marker{display:none;}
+  details.setup summary::before{content:'▸';color:var(--inlay);transition:transform .2s;}
+  details.setup[open] summary::before{transform:rotate(90deg);}
+  .setup-body{padding:2px 16px 16px;font-size:13px;line-height:1.65;color:var(--prose);}
+  .setup-body p{margin:0 0 8px;}
+  .setup-body code{background:#1c1410;border:1px solid var(--edge);border-radius:5px;
+    padding:1.5px 6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e7dcc6;}
+  .setup-body strong{color:var(--maple);}
+
+  .neck-card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;
+    padding:16px 16px 12px;margin-bottom:26px;
+    box-shadow:0 1px 0 var(--edge-soft) inset, 0 18px 40px -30px #000;}
+  .neck-wrap{width:100%;overflow:hidden;border-radius:8px;}
+  svg.neck{display:block;width:100%;height:auto;}
+  .neck-caption{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);}
+  .neck-caption strong{color:var(--brass-soft);font-weight:700;}
+  .neck-caption .wk{color:var(--inlay);}
+
+  .part-head{margin:32px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--edge);}
+  .part-head:first-of-type{margin-top:6px;}
+  .part-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--brass);margin:0 0 4px;}
+  .part-title{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--maple);margin:0 0 2px;}
+  .part-sub{font-size:12.5px;color:var(--text-dim);margin:0;}
+
+  .week{border:1px solid var(--edge);border-radius:12px;background:var(--panel);
+    margin-bottom:12px;overflow:hidden;}
+  .week-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:15px 16px;cursor:pointer;user-select:none;width:100%;background:none;border:none;
+    text-align:left;color:inherit;font:inherit;}
+  .week-head:focus-visible{outline:2px solid var(--brass);outline-offset:-2px;}
+  .week-head-left{display:flex;align-items:center;gap:12px;min-width:0;}
+  .week-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--board);
+    background:var(--brass-soft);padding:3px 7px;border-radius:5px;flex-shrink:0;}
+  .week.roadmap .week-num{background:var(--edge);color:var(--brass-soft);}
+  .week-title{font-family:'Fraunces',serif;font-weight:600;font-size:16.5px;color:var(--maple);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .week-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+  .week-tally{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);}
+  .chev{color:var(--text-dim);transition:transform .25s ease;font-size:11px;}
+  .week.open .chev{transform:rotate(90deg);}
+  .week-body{max-height:0;overflow:hidden;transition:max-height .32s ease;}
+  .roadmap-note{font-size:11.5px;color:var(--brass);font-family:'JetBrains Mono',monospace;
+    padding:12px 16px 2px;letter-spacing:0.01em;line-height:1.5;}
+
+  .day{border-top:1px solid var(--edge);}
+  .day-head{display:flex;gap:13px;padding:14px 16px;align-items:flex-start;cursor:pointer;width:100%;
+    background:none;border:none;text-align:left;color:inherit;font:inherit;}
+  .day-head:focus-visible{outline:2px solid var(--inlay);outline-offset:-2px;}
+  .check{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1.6px solid var(--edge);
+    background:transparent;margin-top:1px;cursor:pointer;
+    transition:background .18s,border-color .18s,transform .1s;display:grid;place-items:center;padding:0;}
+  .check:hover{border-color:var(--brass);}
+  .check:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+  .check:active{transform:scale(.9);}
+  .check.done{background:var(--brass);border-color:var(--brass);
+    box-shadow:0 0 0 4px #c8933f22, 0 0 12px -2px var(--brass);}
+  .check.done::after{content:'♪';font-size:12px;color:var(--board);font-weight:700;line-height:1;}
+  .day-main{flex:1;min-width:0;}
+  .day-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .day-idx{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;
+    padding:2px 6px;border-radius:4px;font-weight:700;}
+  .tag.py{background:#21403b;color:#8fd6cc;}
+  .tag.th{background:#4a3820;color:#e6bd72;}
+  .tag.both{background:#4a2f24;color:#e6a982;}
+  .tag.soon{background:#332a3f;color:#b4a0d6;}
+  .day-title{font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;color:var(--maple);
+    margin:0 0 2px;line-height:1.25;}
+  .day.done .day-title{color:var(--text-dim);}
+  .day-sum{font-size:13px;line-height:1.5;color:var(--text-dim);margin:0;}
+  .day-chev{color:var(--edge);font-size:11px;margin-top:4px;transition:transform .25s;flex-shrink:0;}
+  .day.open .day-chev{transform:rotate(90deg);color:var(--text-dim);}
+
+  .lesson{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .lesson-inner{padding:2px 16px 20px 51px;}
+  .lesson h4{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--brass);margin:16px 0 7px;font-weight:700;}
+  .lesson h4:first-child{margin-top:6px;}
+  .lesson h4.git{color:var(--inlay);}
+  .lesson p{font-size:14px;line-height:1.68;color:var(--prose);margin:0 0 6px;}
+  .lesson em{color:var(--brass-soft);font-style:normal;font-weight:600;}
+  .lesson strong{color:var(--maple);font-weight:600;}
+  pre{background:#1c1410;border:1px solid var(--edge);border-radius:9px;padding:13px 14px;
+    overflow-x:auto;margin:4px 0;}
+  code{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;color:#e7dcc6;}
+  .cmt{color:#7d6a52;}
+  .task{background:#2a1f16;border-left:3px solid var(--inlay);border-radius:0 8px 8px 0;
+    padding:10px 13px;margin-top:12px;}
+  .task .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--inlay);font-weight:700;display:block;margin-bottom:4px;}
+  .task p{margin:0;font-size:13.5px;color:var(--prose);line-height:1.6;}
+  ul.obj{margin:4px 0 2px;padding-left:0;list-style:none;}
+  ul.obj li{font-size:13.5px;line-height:1.55;color:var(--prose);padding:6px 0 6px 20px;
+    position:relative;border-bottom:1px solid var(--edge-soft);}
+  ul.obj li:last-child{border-bottom:none;}
+  ul.obj li::before{content:'';position:absolute;left:2px;top:13px;width:6px;height:6px;
+    border-radius:50%;background:var(--brass);}
+  .soon-note{font-size:13px;line-height:1.6;color:var(--text-dim);margin:6px 0 0;}
+  .soon-note em{color:var(--brass-soft);font-style:normal;font-weight:600;}
+
+  footer{margin-top:30px;text-align:center;font-size:11px;color:var(--edge);
+    font-family:'JetBrains Mono',monospace;line-height:1.8;}
+  .reset-btn{background:none;border:1px solid var(--edge);color:var(--text-dim);
+    font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 13px;border-radius:7px;
+    cursor:pointer;margin-top:10px;}
+  .reset-btn:hover{border-color:var(--brass);color:var(--brass-soft);}
+  .reset-btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  @media (max-width:440px){ h1{font-size:34px;} .lesson-inner{padding-left:16px;} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">A 30-minute daily course · guitar edition</p>
+    <h1>Scales <span class="amp">&amp;</span> Scripts</h1>
+    <p class="sub">Learn Python and music theory together, built for a guitar player &mdash; no sheet music, no staff. Sixteen weeks, from your first <code>print()</code> to modes, arpeggios, and composing with code. It all runs on one idea: <strong>a fret is a number</strong>. Tap a session for the lesson; tap the circle to mark it done. Your place saves on this device.</p>
+  </header>
+
+  <details class="setup">
+    <summary>Playing sound on Linux &mdash; one-time setup</summary>
+    <div class="setup-body">
+      <p><strong>1.</strong> Install the library: <code>pip install music21</code></p>
+      <p><strong>2.</strong> Install a MIDI player + soundfont (Ubuntu/Debian): <code>sudo apt install timidity fluid-soundfont-gm</code></p>
+      <p><strong>3.</strong> The course writes MIDI files with <code>stream.write('midi', fp='riff.mid')</code>, then you play them from the terminal: <code>timidity riff.mid</code></p>
+      <p>Prefer a graphical player? VLC and DAWs like Ardour or Reaper open <code>.mid</code> files too. And when you want live, instant sound later on, <strong>FoxDot</strong> and <strong>Sonic Pi</strong> both run beautifully on Linux &mdash; we point at them in Part IV.</p>
+    </div>
+  </details>
+
+  <div class="neck-card">
+    <div class="neck-wrap"><svg class="neck" id="neck" viewBox="0 0 660 132" role="img" aria-label="Fretboard progress meter"></svg></div>
+    <div class="neck-caption">
+      <span><strong id="doneCount">0</strong> / <span id="totalCount">80</span> sessions played</span>
+      <span class="wk" id="weekLabel">Week 1 of 16</span>
+    </div>
+  </div>
+
+  <div id="weeks"></div>
+
+  <footer>
+    Progress is stored on this device for this course.<br>
+    <button class="reset-btn" id="resetBtn">Reset all progress</button>
+  </footer>
+</div>
+
+<script>
+/* ================= curriculum ================= */
+const CURRICULUM = [
+
+/* ---------- PART I ---------- */
+{ week:1, part:1, partTitle:"Part I — Foundations", partSub:"Python from zero, using the fretboard as your world.",
+  title:"The fret is a number", full:true, days:[
+  { t:"both", title:"The one big idea", sum:"Every note is a number, and each fret adds one.",
+    idea:"<p>Moving up one fret raises the pitch by the smallest step in Western music &mdash; a <em>semitone</em>. Give a string a starting number and every fret is just that number plus how many frets up you are. That's the whole trick of this course: turn frets into numbers, do math on them, and the math <em>is</em> the music.</p><p>We'll use the numbers music software speaks (MIDI). Your open low E string is <strong>40</strong>.</p>",
+    git:"<p>Open low E = 40. Fret 1 = 41 &hellip; fret 5 = 45. And the magic: fret 5 on the low E is an A &mdash; the same note as your open A string. That's the tuning trick you already know. <strong>Same number, same note.</strong></p>",
+    code:`# print() shows a value on the screen
+print(40)        # your open low E string
+
+# move up 5 frets by adding 5
+print(40 + 5)    # fret 5 on the low E is an A`,
+    task:"Install Python from python.org, or open python.org/shell. Run both lines, then print where fret 7 on the low E lands." },
+  { t:"py", title:"Give it a name: variables", sum:"Store the open string once, then do fret math with the name.",
+    idea:"<p>Typing 40 everywhere is fragile. A <em>variable</em> is a labelled box for a value. Name the open string once, and all your fret math reads in plain English.</p>",
+    git:"<p><code>low_e</code> holds 40, so <code>low_e + 3</code> is the 3rd fret. Change tuning later? Change one number and everything follows.</p>",
+    code:`low_e = 40         # store the open low E
+fret = 3
+note = low_e + fret
+print(note)        # 43
+
+print(low_e + 12)  # 12 frets up = one octave = E again (52)`,
+    task:"Make variables for two frets, then print the distance between them by subtracting. That distance has a name &mdash; interval &mdash; coming soon." },
+  { t:"py", title:"Words for the numbers: strings", sum:"Build a readable sentence from text and numbers.",
+    idea:"<p>Text in Python is a <em>string</em> &mdash; letters in quotes. An <em>f-string</em> (an <code>f</code> before the quotes) drops variables straight into a sentence with curly braces.</p>",
+    code:`string_name = "low E"
+fret = 5
+note = 40 + fret
+print(f"Fret {fret} on the {string_name} is note {note}")`,
+    task:"Print a sentence for fret 7 on the low E. What note number is it? (Quiet hint: a B.)" },
+  { t:"py", title:"A whole string of notes: lists", sum:"Your six open strings are just a list of six numbers.",
+    idea:"<p>A <em>list</em> holds many values in order, in square brackets. Python counts positions from <strong>0</strong>, so <code>[0]</code> is the first item.</p>",
+    git:"<p>Six open strings, low to high: <code>[40, 45, 50, 55, 59, 64]</code>. The frets in a riff are a list too &mdash; a melody is just data.</p>",
+    code:`open_strings = [40, 45, 50, 55, 59, 64]  # low E to high E
+print(open_strings[0])   # 40, the low E
+print(open_strings[5])   # 64, the high E
+
+riff = [0, 3, 5, 3, 0]   # frets on one string
+print(riff)`,
+    task:"Print the item at position 2. Counting starts at 0 &mdash; which string did you get?" },
+  { t:"py", title:"Walk up the neck: for loops", sum:"Do the same thing to every fret in a list.",
+    idea:"<p>A <em>for loop</em> repeats an action once per item in a list. Let it walk your frets and turn each into a real note.</p>",
+    code:`low_e = 40
+riff = [0, 3, 5, 3, 0]
+
+for fret in riff:
+    print(low_e + fret)   # each note of the riff`,
+    task:"Change the riff to any five frets and run it. You just described a melody as data." },
+]},
+
+{ week:2, part:1, title:"Recipes, decisions &amp; first sound", full:true, days:[
+  { t:"py", title:"Make it reusable: functions", sum:"One recipe: what note is at this string and fret?",
+    idea:"<p>A <em>function</em> is a named recipe you reuse. Define it with <code>def</code>, hand it inputs, get an answer with <code>return</code>.</p>",
+    git:"<p>The same recipe works on every string &mdash; feed it the open A (45) and you're doing A-string math with zero extra code.</p>",
+    code:`def note_at(open_string, fret):
+    return open_string + fret
+
+print(note_at(40, 5))   # low E, fret 5  -> 45 (A)
+print(note_at(45, 5))   # A string, fret 5 -> 50 (D)`,
+    task:"Find fret 12 on the high E (open = 64). It's an E an octave up &mdash; what number?" },
+  { t:"py", title:"Yes or no: conditionals", sum:"if/else lets code make a decision about a note.",
+    idea:"<p><code>if</code>/<code>else</code> lets code choose. Meet <code>%</code> (modulo) too: <code>note % 12</code> folds every octave onto the same 12 names &mdash; which is <em>why</em> fret 12 sounds like the same note, higher.</p>",
+    code:`def name_pitch(note):
+    names = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+    return names[note % 12]
+
+note = 45
+if name_pitch(note) == "A":
+    print("That's an A!")
+else:
+    print("Not an A")`,
+    task:"Change note to 40 and predict the output first. (40 % 12 = 4, names[4] = ?)" },
+  { t:"both", title:"Distance = interval", sum:"An interval is just the gap between two notes, in frets.",
+    idea:"<p>An <em>interval</em> is the distance between two notes in frets/semitones &mdash; plain subtraction. The common ones: 0 unison, 12 octave, 7 perfect fifth, 5 perfect fourth, 4 major third, 3 minor third.</p>",
+    git:"<p>The perfect fifth (7 frets) is your best friend: <strong>root + 7 is a power chord.</strong> A root and the note seven frets up.</p>",
+    code:`def interval(a, b):
+    return abs(b - a)
+
+root = 40
+fifth = root + 7
+print(interval(root, fifth))   # 7 -> a perfect fifth`,
+    task:"Pick any root and print the note 7 above it. You just built a power chord as numbers." },
+  { t:"both", title:"Turn a number into sound", sum:"Meet music21 and make a note actually ring (Linux-ready).",
+    idea:"<p>music21 turns numbers into real sound and MIDI files. On Linux the most reliable path is to <em>write a MIDI file and play it from the terminal</em> (see the setup box up top).</p>",
+    code:`# setup once:  pip install music21
+#              sudo apt install timidity fluid-soundfont-gm
+from music21 import note
+
+n = note.Note(45)              # 45 = an A (your open A string)
+n.write('midi', fp='note.mid')
+print(n.name)                  # 'A'
+# then in a terminal:  timidity note.mid`,
+    task:"Write and play note 40 (open low E). Any media player opens a .mid file too if you'd rather click." },
+  { t:"both", title:"Your first riff, out loud", sum:"Loop a fret list into notes and play the whole thing.",
+    idea:"<p>A <em>Stream</em> is a container you fill with notes and play in sequence. Loop your frets, turn each into a note, add it, then write the file.</p>",
+    code:`from music21 import note, stream
+
+low_e = 40
+riff = [0, 3, 5, 7, 5, 3, 0]
+
+s = stream.Stream()
+for fret in riff:
+    s.append(note.Note(low_e + fret))
+
+s.write('midi', fp='riff.mid')   # then: timidity riff.mid`,
+    task:"Swap in your own frets and play it. Everything after this is a richer version of exactly this move." },
+]},
+
+{ week:3, part:1, title:"Scales are patterns", full:true, days:[
+  { t:"th", title:"Steps: how a scale is built", sum:"Whole steps (2 frets) and half steps (1) stacked in a pattern.",
+    idea:"<p>A scale is a ladder of notes from the 12. Gaps are either a <em>whole step</em> (2 frets) or a <em>half step</em> (1 fret). The major scale's pattern is always <strong>2, 2, 1, 2, 2, 2, 1</strong>. Follow it from any note and it sounds major.</p>",
+    git:"<p>On one string, move 2, 2, 1, 2, 2, 2, 1 frets from anywhere &mdash; that's a major scale. The pattern never changes, which is why guitar shapes are movable.</p>",
+    code:`major_steps = [2, 2, 1, 2, 2, 2, 1]
+print(sum(major_steps))   # 12 -> a full octave`,
+    task:"Add up the minor pattern [2, 1, 2, 2, 1, 2, 2]. It should also reach 12 &mdash; every scale spans an octave." },
+  { t:"both", title:"Build a scale in code", sum:"Turn a step pattern into real note numbers.",
+    idea:"<p>Walk the step pattern from a start note, adding each step, collecting notes into a list. One small function does it for any scale.</p>",
+    code:`def build_scale(start, steps):
+    notes = [start]
+    current = start
+    for step in steps:
+        current = current + step
+        notes.append(current)
+    return notes
+
+major = [2, 2, 1, 2, 2, 2, 1]
+print(build_scale(40, major))   # E major from the open low E`,
+    task:"Build a scale from 45 (open A). That's A major &mdash; from arithmetic, no chart." },
+  { t:"th", title:"Movable shapes = adding a number", sum:"Slide the shape up the neck = add the same number to every note.",
+    idea:"<p>Guitar and code line up perfectly here. New key = slide the shape up the neck = add the same number to every note. Capo on fret 2? Add 2 to everything.</p><p>The <code>[n + amount for n in notes]</code> line is a <em>list comprehension</em> &mdash; a compact loop that builds a new list.</p>",
+    code:`def transpose(notes, amount):
+    return [n + amount for n in notes]
+
+e_major = build_scale(40, [2,2,1,2,2,2,1])
+capo2   = transpose(e_major, 2)   # capo fret 2 -> F# major
+print(capo2)`,
+    task:"Transpose your scale up 5. On the neck that's the same fingers, five frets higher &mdash; a new key for free." },
+  { t:"both", title:"A darker mood: minor", sum:"Same machinery, new data, new feeling.",
+    idea:"<p>Nothing new to build &mdash; feed a different step pattern. Natural minor is <strong>2, 1, 2, 2, 1, 2, 2</strong>, and that small rearrangement is the whole difference between bright and moody.</p>",
+    code:`minor = [2, 1, 2, 2, 1, 2, 2]
+a_minor = build_scale(45, minor)   # A minor from the open A
+print(a_minor)`,
+    task:"Build minor from 40 and line it up against E major. Which notes moved, and by how much?" },
+  { t:"both", title:"Play your scale", sum:"Hear it climb and come back down.",
+    idea:"<p>Loop the scale into a stream going up, then loop the <em>reversed</em> list to come back down.</p>",
+    code:`from music21 import note, stream
+scale = build_scale(40, [2,2,1,2,2,2,1])
+
+s = stream.Stream()
+for n in scale:
+    s.append(note.Note(n))
+for n in reversed(scale):
+    s.append(note.Note(n))
+
+s.write('midi', fp='scale.mid')   # timidity scale.mid`,
+    task:"Play a minor scale the same way. You can now build and hear scales from scratch &mdash; in code and on the neck." },
+]},
+
+{ week:4, part:1, title:"Melody &amp; rhythm", full:true, days:[
+  { t:"both", title:"Melody is an order, not a climb", sum:"A scale is your palette; a melody is a path through it.",
+    idea:"<p>A scale is the palette; a melody is a path through it. Instead of always going up, pick an order &mdash; jumps and repeats are what make it sing. Pick notes by their <em>position</em> in the scale (0 = root).</p>",
+    code:`scale = build_scale(40, [2,2,1,2,2,2,1])   # E major, 8 notes (0..7)
+degrees = [0, 2, 4, 2, 0, 4, 7]
+melody = [scale[d] for d in degrees]
+print(melody)`,
+    git:"<p>Those degrees are like choosing which notes of a box shape to hit, and in what order.</p>",
+    task:"Change the degrees to make your own 7-note phrase. Stay in the scale and it always sounds right." },
+  { t:"py", title:"Give notes length: rhythm", sum:"Pitch is only half of music — add duration.",
+    idea:"<p>In music21 a note has a <code>quarterLength</code>: 1 is a beat, 0.5 an eighth, 2 a half note. Rhythm is what turns a scale run into a riff. <code>zip</code> pairs each degree with a length.</p>",
+    code:`from music21 import note, stream
+scale = build_scale(40, [2,2,1,2,2,2,1])
+
+degrees   = [0, 2, 4, 2, 0, 4, 7]
+durations = [0.5, 0.5, 1, 0.5, 0.5, 1, 2]
+
+s = stream.Stream()
+for d, dur in zip(degrees, durations):
+    s.append(note.Note(scale[d], quarterLength=dur))
+s.write('midi', fp='melody.mid')`,
+    task:"Mix long and short durations for a swung feel, then play it." },
+  { t:"py", title:"Tempo &amp; feel", sum:"Same notes, ballad or shred — that's tempo.",
+    idea:"<p>Tempo is speed in beats per minute. Insert a <code>MetronomeMark</code> and the same notes become a ballad or a shred.</p>",
+    code:`from music21 import tempo
+s.insert(0, tempo.MetronomeMark(number=120))   # 120 bpm
+s.write('midi', fp='melody120.mid')`,
+    task:"Render your melody at 80 and at 160 bpm. Same notes, different song." },
+  { t:"both", title:"Ideas from thin air: random", sum:"Constrain randomness to your scale and it sounds musical.",
+    idea:"<p>Python's <code>random</code> can hand you note choices. Constrain it to your scale and even randomness lands in key.</p>",
+    code:`import random
+scale = build_scale(45, [2,1,2,2,1,2,2])   # A minor
+phrase = [random.choice(scale) for _ in range(8)]
+print(phrase)`,
+    git:"<p>A generative lick, guaranteed in key because you only ever pick from the scale.</p>",
+    task:"Generate a few phrases, keep the one you like. You just improvised with code." },
+  { t:"both", title:"Repeat and vary — the riff", sum:"State an idea, repeat it, answer it differently.",
+    idea:"<p>Riffs live on repetition with a twist. State a phrase, repeat it, then change the ending &mdash; that call-and-response is the backbone of most songs.</p>",
+    code:`from music21 import note, stream
+scale = build_scale(40, [2,2,1,2,2,2,1])
+
+phrase = [scale[d] for d in [0, 2, 4, 2]]
+riff = phrase + phrase[:-1] + [scale[5]]   # repeat, new last note
+
+s = stream.Stream()
+for p in riff:
+    s.append(note.Note(p, quarterLength=0.5))
+s.write('midi', fp='riff2.mid')`,
+    task:"Build a riff that states an idea, repeats it, then answers it a new way." },
+]},
+
+/* ---------- PART II ---------- */
+{ week:5, part:2, partTitle:"Part II — Scales, Modes &amp; the Fretboard", partSub:"The colours beyond major and minor, and drawing the neck in code.",
+  title:"The modes", full:true, days:[
+  { t:"th", title:"What a mode really is", sum:"Seven notes, seven starting points, seven moods.",
+    idea:"<p>Here's the secret modes make mysterious: the seven modes of the major scale are the <em>same seven notes</em>, just starting from a different one. Start C major from C = Ionian (major). Start it from A = Aeolian (natural minor). Same notes, new home base, new mood.</p>",
+    git:"<p>On guitar it's the same box shape &mdash; you just treat a different note as \"home.\" That shift is everything.</p>",
+    code:`major = build_scale(40, [2,2,1,2,2,2,1])   # E Ionian
+notes7 = major[:7]     # drop the repeated octave
+print(notes7)`,
+    task:"Say it out loud: same notes, different starting note = different mode. That's the whole idea." },
+  { t:"both", title:"Modes are list rotations", sum:"Starting from a later note = rotating the list.",
+    idea:"<p>Starting the same notes from a later point is exactly what it sounds like in code: <em>rotate the list</em>. Slice from position n and wrap the front around to the back.</p>",
+    code:`def rotate(lst, n):
+    return lst[n:] + lst[:n]
+
+notes = [0, 2, 4, 5, 7, 9, 11]   # C major pitch classes
+print(rotate(notes, 1))          # start from 2nd note = Dorian
+print(rotate(notes, 5))          # start from 6th = Aeolian (minor)`,
+    git:"<p>Each rotation is you sliding \"home\" one scale-note along the neck.</p>",
+    task:"Rotate to position 4 &mdash; that's Mixolydian, the mode behind countless rock and blues riffs." },
+  { t:"th", title:"The seven names &amp; their flavours", sum:"From bright to dark, in rotation order.",
+    idea:"<p>In rotation order: <strong>Ionian</strong> (bright major), <strong>Dorian</strong> (minor but hopeful), <strong>Phrygian</strong> (dark, Spanish edge), <strong>Lydian</strong> (dreamy, floating), <strong>Mixolydian</strong> (bluesy major), <strong>Aeolian</strong> (natural minor), <strong>Locrian</strong> (unstable, rarely home).</p>",
+    code:`MODES = ["Ionian","Dorian","Phrygian","Lydian",
+         "Mixolydian","Aeolian","Locrian"]
+for i, name in enumerate(MODES):
+    print(i, name)   # i = how far to rotate the major scale`,
+    task:"Dorian is 1, Mixolydian is 4, Aeolian is 5 &mdash; can you fill in the rest?" },
+  { t:"both", title:"Build any mode from steps", sum:"Rotate the step pattern, build from any root.",
+    idea:"<p>A mode has its own step pattern &mdash; just the rotated gaps. Rotate the major pattern and build the mode from any root directly.</p>",
+    code:`major_steps = [2,2,1,2,2,2,1]
+def mode_steps(n):
+    return rotate(major_steps, n)
+
+dorian = build_scale(45, mode_steps(1))   # A Dorian
+print(dorian)`,
+    task:"Build E Mixolydian from 40 (rotation 4). Compare it to E major &mdash; exactly one note differs. Which?" },
+  { t:"both", title:"Play the modes back to back", sum:"Train your ear on all seven from one root.",
+    idea:"<p>Hear the difference. Loop through the modes from the same root and play each &mdash; your ear starts to recognise the moods.</p>",
+    code:`from music21 import note, stream
+s = stream.Stream()
+for n in range(7):
+    for p in build_scale(40, mode_steps(n)):
+        s.append(note.Note(p))
+s.write('midi', fp='modes.mid')   # timidity modes.mid`,
+    task:"Play it and jot one word for how each mode feels. That vocabulary beats any chart." },
+]},
+
+{ week:6, part:2, title:"Pentatonics &amp; the blues", full:true, days:[
+  { t:"th", title:"Five notes that always work", sum:"The minor pentatonic: fewer notes, fewer wrong ones.",
+    idea:"<p>The <em>minor pentatonic</em> is the guitarist's home scale &mdash; the minor scale with its two tension notes removed, leaving five that sound good over almost anything.</p>",
+    code:`minor = build_scale(45, [2,1,2,2,1,2,2])   # A minor
+pent = [minor[d] for d in [0, 2, 3, 4, 6]]  # keep these degrees
+print(pent)`,
+    task:"Pull the same degrees from a minor scale built on 40 &mdash; that's E minor pentatonic, the sound of a thousand solos." },
+  { t:"both", title:"A function for pentatonics", sum:"Any root, instant scale.",
+    idea:"<p>Wrap it so any root gives a pentatonic &mdash; cleaner code, instant scales.</p>",
+    code:`def minor_pentatonic(root):
+    m = build_scale(root, [2,1,2,2,1,2,2])
+    return [m[d] for d in [0,2,3,4,6]]
+
+print(minor_pentatonic(40))   # E minor pentatonic
+print(minor_pentatonic(50))   # D minor pentatonic`,
+    git:"<p>Same box shape, moved. Change the root, slide the shape.</p>",
+    task:"Write major_pentatonic too &mdash; it keeps degrees 0, 1, 2, 4, 5 of the major scale." },
+  { t:"th", title:"The blue note", sum:"Minor pentatonic plus one gritty extra note.",
+    idea:"<p>The <em>blues scale</em> is minor pentatonic plus the flat fifth &mdash; that gritty in-between note. In semitones from the root, minor pentatonic is [0, 3, 5, 7, 10]; add 6 and you've got the blues.</p>",
+    code:`def blues(root):
+    steps = [0, 3, 5, 6, 7, 10]   # 6 = the blue note
+    return [root + s for s in steps]
+
+print(blues(45))   # A blues scale`,
+    task:"Play a blues scale (write to MIDI, timidity it). That one added note is where the attitude lives." },
+  { t:"both", title:"Solo over a drone", sum:"A scale becomes music with something to sit against.",
+    idea:"<p>Play a held root under a pentatonic run and you're improvising. Two <em>Parts</em> in a <em>Score</em> play at the same time.</p>",
+    code:`from music21 import note, stream
+box = minor_pentatonic(45)
+
+lead = stream.Part()
+for p in box + box[::-1]:
+    lead.append(note.Note(p, quarterLength=0.5))
+
+drone = stream.Part()
+drone.append(note.Note(45, quarterLength=len(box)*2*0.5))
+
+stream.Score([lead, drone]).write('midi', fp='solo.mid')`,
+    task:"Swap the lead for random.choice from the box &mdash; instant, in-key improvisation over your drone." },
+  { t:"both", title:"Bend the box: shifting position", sum:"Octave up, or a new key — transposition again.",
+    idea:"<p>Move a pentatonic up 12 and it's the same shape an octave higher; up 5 or 7 and you've changed key. The move you already know.</p>",
+    code:`box = minor_pentatonic(40)
+higher = [n + 12 for n in box]   # same shape, octave up
+newkey = [n + 5 for n in box]    # up a fourth
+print(higher)
+print(newkey)`,
+    task:"Play the original box then the octave-up version &mdash; two positions of one scale on the neck." },
+]},
+
+{ week:7, part:2, title:"Dictionaries &amp; names", full:true, days:[
+  { t:"py", title:"A better lookup: dictionaries", sum:"Find things by a label, not a position.",
+    idea:"<p>A list finds things by position; a <em>dictionary</em> finds them by a label (a key). Perfect for tunings, names, and chords.</p>",
+    code:`tunings = {
+    "standard": [40, 45, 50, 55, 59, 64],
+    "drop_d":   [38, 45, 50, 55, 59, 64],
+}
+print(tunings["drop_d"])   # low string dropped to D`,
+    git:"<p>Drop D is literally your low E lowered two frets &mdash; 40 becomes 38. One number.</p>",
+    task:"Add \"open_g\": [38, 43, 50, 55, 59, 62] to the dictionary and print it." },
+  { t:"py", title:"Name a note, both ways", sum:"Number to name, and name to number.",
+    idea:"<p>A dictionary makes the reverse lookup easy: name &rarr; number, while <code>%12</code> still does number &rarr; name.</p>",
+    code:`NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+name_to_pc = {n: i for i, n in enumerate(NAMES)}
+print(name_to_pc["A"])   # 9
+print(NAMES[45 % 12])    # 'A'`,
+    task:"Look up your favourite note's pitch class, then confirm it with a MIDI number of that note % 12." },
+  { t:"py", title:"Chord shapes as data", sum:"Store chord recipes; one function reads any of them.",
+    idea:"<p>Store chord recipes in a dictionary: a name mapped to the semitone steps that build it. One function reads any recipe.</p>",
+    code:`CHORDS = {"maj":[0,4,7], "min":[0,3,7], "power":[0,7]}
+
+def build_chord(root, quality):
+    return [root + s for s in CHORDS[quality]]
+
+print(build_chord(40, "power"))   # E5 power chord
+print(build_chord(45, "min"))     # A minor`,
+    task:"Add \"dim\": [0,3,6] and build a diminished chord. You'll meet it properly in Part III." },
+  { t:"py", title:"Loop a dictionary", sum:"Walk keys and values together with .items().",
+    idea:"<p><code>.items()</code> walks keys and values together &mdash; handy for printing a whole set of chords at once.</p>",
+    code:`for quality, steps in CHORDS.items():
+    print(quality, "->", build_chord(40, quality))`,
+    task:"Print every chord type built from root 45 &mdash; one loop, your whole chord vocabulary." },
+  { t:"both", title:"Your personal music toolkit", sum:"Collect your best functions into one file.",
+    idea:"<p>Pull your helpers &mdash; <code>build_scale</code>, <code>transpose</code>, <code>minor_pentatonic</code>, <code>build_chord</code> &mdash; into one file, <code>toolkit.py</code>. Import from it and every future session starts stocked.</p>",
+    code:`# toolkit.py holds your functions; then in any script:
+from toolkit import build_scale, minor_pentatonic, build_chord
+print(minor_pentatonic(40))`,
+    git:"<p>Like keeping your capo, slide, and picks in one case &mdash; grab the case, everything's there.</p>",
+    task:"Make toolkit.py and import one function into a fresh script to prove it works." },
+]},
+
+{ week:8, part:2, title:"Draw the fretboard", full:true, days:[
+  { t:"py", title:"Text on a grid: nested loops", sum:"A loop inside a loop visits every square.",
+    idea:"<p>A fretboard is a grid: strings down, frets across. A loop <em>inside</em> a loop visits every square &mdash; the pattern behind printing any grid.</p>",
+    code:`strings = 6
+frets = 5
+for s in range(strings):
+    row = ""
+    for f in range(frets + 1):
+        row += "-|-"
+    print(row)`,
+    task:"Change frets to 12 and run it &mdash; a blank neck, printed by code." },
+  { t:"py", title:"Label the frets", sum:"Fixed-width formatting keeps columns tidy.",
+    idea:"<p>String formatting lines things up: <code>f\"{f:>4}\"</code> right-aligns in a 4-wide field, so columns stay tidy no matter the content.</p>",
+    code:`frets = 12
+header = "     " + "".join(f"{f:>4}" for f in range(frets + 1))
+print(header)   # fret numbers across the top`,
+    git:"<p>That's your fret-number strip &mdash; the one printed along a neck diagram.</p>",
+    task:"Print the header, then a couple of blank string rows under it so it reads like a real diagram." },
+  { t:"py", title:"Put the notes on", sum:"Compute each note and print its name where it lands.",
+    idea:"<p>Combine fretboard math with the grid: for each string and fret, compute the note and print its name. (High E on top, so it prints the way a diagram looks.)</p>",
+    code:`NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+opens = [64, 59, 55, 50, 45, 40]   # high E at top
+for op in opens:
+    row = ""
+    for f in range(6):
+        row += f"{NAMES[(op+f)%12]:>3}"
+    print(row)`,
+    task:"Extend it to 12 frets. You just printed every note on the neck &mdash; no chart needed." },
+  { t:"both", title:"Light up a scale", sum:"Show only a scale's notes; dot the rest.",
+    idea:"<p>Show only notes that belong to a scale, dot everything else, and the fretboard reveals the scale's shape. A <em>set</em> of pitch classes makes the \"is it in the scale?\" check instant.</p>",
+    code:`scale_pcs = {n % 12 for n in minor_pentatonic(45)}
+for op in [64,59,55,50,45,40]:
+    row = ""
+    for f in range(13):
+        pc = (op + f) % 12
+        row += f"{NAMES[pc]:>4}" if pc in scale_pcs else "   ."
+    print(row)`,
+    git:"<p>There it is &mdash; the A minor pentatonic box you play, drawn by your own code.</p>",
+    task:"Swap in a mode or the blues scale and watch its shape appear across the neck." },
+  { t:"both", title:"Make it a tool", sum:"Wrap it so you can explore any scale on demand.",
+    idea:"<p>Wrap the printer in a function that takes any scale. Now it's a real practice tool &mdash; add it to <code>toolkit.py</code>.</p>",
+    code:`def show_fretboard(scale_notes, frets=12):
+    pcs = {n % 12 for n in scale_notes}
+    for op in [64,59,55,50,45,40]:
+        row = "".join(
+            f"{NAMES[(op+f)%12]:>4}" if (op+f)%12 in pcs else "   ."
+            for f in range(frets+1))
+        print(row)
+
+show_fretboard(build_scale(40, mode_steps(1)))   # E Dorian on the neck`,
+    task:"Call it for three different scales. You've built a tool you'll actually use." },
+]},
+
+/* ---------- PART III ---------- */
+{ week:9, part:3, partTitle:"Part III — Harmony &amp; Arpeggios", partSub:"Stacking notes into chords, then rolling them out one at a time.",
+  title:"Triads &amp; chord quality", full:true, days:[
+  { t:"th", title:"Stack thirds, get a chord", sum:"Three notes stacked: root, a third, a fifth.",
+    idea:"<p>A basic chord (a <em>triad</em>) is three notes stacked in thirds. Major = root, +4, +7. Minor = root, +3, +7. That one-semitone swap in the middle is the whole difference between happy and sad.</p>",
+    code:`def triad(root, quality="maj"):
+    third = 4 if quality == "maj" else 3
+    return [root, root + third, root + 7]
+
+print(triad(40, "maj"))   # E major
+print(triad(40, "min"))   # E minor`,
+    task:"Print a major and a minor triad from 45 and note which single number changed." },
+  { t:"both", title:"Hear a chord (notes together)", sum:"chord.Chord plays notes at once, not in sequence.",
+    idea:"<p>A chord is notes sounding at once. <code>chord.Chord</code> plays them together, unlike a stream that plays in sequence.</p>",
+    code:`from music21 import chord, stream
+s = stream.Stream()
+s.append(chord.Chord(triad(40, "maj")))
+s.append(chord.Chord(triad(45, "min")))
+s.write('midi', fp='chords.mid')`,
+    task:"Play E major then A minor. Swap their qualities and hear the mood flip." },
+  { t:"th", title:"Two more colours: dim &amp; aug", sum:"Tense (diminished) and dreamy (augmented).",
+    idea:"<p>Diminished (root, +3, +6) sounds tense and unstable; augmented (root, +4, +8) sounds dreamy and unresolved. Four triad types, all just different stacks.</p>",
+    code:`TRIADS = {"maj":[0,4,7], "min":[0,3,7], "dim":[0,3,6], "aug":[0,4,8]}
+
+def make_triad(root, q):
+    return [root + s for s in TRIADS[q]]
+
+for q in TRIADS:
+    print(q, make_triad(40, q))`,
+    task:"Build and play all four from one root, back to back. Your ear sorts them fast." },
+  { t:"both", title:"Inversions: same chord, new order", sum:"Move the low note up an octave — a new voicing.",
+    idea:"<p>Move the lowest note up an octave and it's the same chord, reshuffled &mdash; an <em>inversion</em>. On guitar that's a different shape for the same chord.</p>",
+    code:`def invert(chord_notes):
+    return chord_notes[1:] + [chord_notes[0] + 12]
+
+c = make_triad(40, "maj")
+print(c)            # root position
+print(invert(c))    # first inversion`,
+    task:"Invert a chord twice and play all three versions &mdash; same chord, three voicings up the neck." },
+  { t:"both", title:"Broken chords hint at arpeggios", sum:"Play a chord's notes one at a time and it turns melodic.",
+    idea:"<p>Play a chord's notes one at a time instead of together and it becomes melodic &mdash; a <em>broken chord</em>. That's the doorway to arpeggios, next week.</p>",
+    code:`from music21 import note, stream
+s = stream.Stream()
+for p in make_triad(40, "maj"):
+    s.append(note.Note(p, quarterLength=0.5))
+s.write('midi', fp='broken.mid')`,
+    task:"Break a minor chord the same way, then reverse the note order. You're already arpeggiating." },
+]},
+
+{ week:10, part:3, title:"Seventh chords &amp; arpeggios", full:true, days:[
+  { t:"th", title:"Add a fourth note: sevenths", sum:"Stack one more third for richer, jazzier chords.",
+    idea:"<p>Stack one more third on a triad and you get a <em>seventh chord</em> &mdash; richer, jazzier. Major 7 (0,4,7,11) is lush; dominant 7 (0,4,7,10) is bluesy and wants to resolve; minor 7 (0,3,7,10) is smooth.</p>",
+    code:`SEVENTHS = {"maj7":[0,4,7,11], "dom7":[0,4,7,10], "min7":[0,3,7,10]}
+
+def seventh(root, q):
+    return [root + s for s in SEVENTHS[q]]
+
+print(seventh(40, "dom7"))   # E7 -- the blues chord`,
+    task:"Build all three sevenths from 45, play each as a chord, and name the mood you hear." },
+  { t:"both", title:"An arpeggio is a chord, one note at a time", sum:"Same recipe as a chord — just played melodically.",
+    idea:"<p>An <em>arpeggio</em> is simply a chord played melodically &mdash; its notes in sequence. Same recipe; you just don't play them together. Guitarists build whole solos from them.</p>",
+    code:`from music21 import note, stream
+
+def arpeggio(chord_notes, quarter=0.25):
+    s = stream.Stream()
+    for p in chord_notes:
+        s.append(note.Note(p, quarterLength=quarter))
+    return s
+
+arpeggio(seventh(40, "maj7")).write('midi', fp='arp.mid')`,
+    task:"Arpeggiate a min7 chord, then arpeggiate it descending (reverse the notes)." },
+  { t:"both", title:"Sweep the shape: up and down", sum:"Roll up and back down in one fluid run.",
+    idea:"<p>Real arpeggios roll up and back down. Combine the notes with their reverse (trimming the ends so they don't repeat) for that sweeping run.</p>",
+    code:`def sweep(chord_notes):
+    up = chord_notes
+    down = list(reversed(chord_notes))[1:-1]
+    return up + down + up[:1]
+
+arpeggio(sweep(seventh(45, "min7")), 0.2).write('midi', fp='sweep.mid')`,
+    task:"Sweep a dom7 arpeggio. Shrink the quarter value for that fast, fluid feel." },
+  { t:"both", title:"Arpeggio across octaves", sum:"Extend the shape into the next position up.",
+    idea:"<p>Extend an arpeggio by adding the same notes an octave up &mdash; the way a guitar arpeggio spans several strings and positions.</p>",
+    code:`def two_octave_arp(chord_notes):
+    return chord_notes + [n + 12 for n in chord_notes]
+
+arpeggio(two_octave_arp(triad(40, "min")), 0.2).write('midi', fp='twooct.mid')`,
+    git:"<p>Same shape, next position up the neck &mdash; two octaves of the chord.</p>",
+    task:"Build a two-octave maj7 arpeggio and run it up and back with your sweep function." },
+  { t:"both", title:"Arpeggiate a progression", sum:"Roll each chord's arpeggio in turn.",
+    idea:"<p>Put it together: for each chord in a progression, roll its arpeggio. That's an accompaniment pattern you hear in countless songs.</p>",
+    code:`from music21 import note, stream
+progression = [triad(40,"min"), triad(45,"maj"), triad(50,"maj")]
+
+s = stream.Stream()
+for ch in progression:
+    for p in ch:
+        s.append(note.Note(p, quarterLength=0.5))
+s.write('midi', fp='arp_prog.mid')`,
+    task:"Turn one chord into a seventh and arpeggiate again &mdash; notice how one richer chord colours the phrase." },
+]},
+
+{ week:11, part:3, title:"Diatonic harmony", full:false,
+  note:"Roadmap — tap any session and I'll write it out in full, same shape as the earlier lessons.",
+  days:[
+  { t:"th", title:"Chords that belong to a key", sum:"Why a key has exactly seven chords." },
+  { t:"both", title:"Harmonise a scale in code", sum:"Stack thirds within the scale to chord each degree." },
+  { t:"th", title:"Roman numerals", sum:"I ii iii IV V vi vii° — naming chords by position." },
+  { t:"py", title:"Let the scale decide quality", sum:"Major or minor, worked out automatically." },
+  { t:"both", title:"Diatonic chords for any mode", sum:"One function, every key and mode's home chords." },
+]},
+
+{ week:12, part:3, title:"Progressions &amp; the circle of fifths", full:false,
+  note:"Roadmap — tap any session and I'll write it out in full, same shape as the earlier lessons.",
+  days:[
+  { t:"both", title:"I–IV–V and friends", sum:"The progressions behind most songs, from diatonic chords." },
+  { t:"both", title:"The circle of fifths is +7", sum:"Tour every key by adding seven, over and over." },
+  { t:"th", title:"Why V wants to go home", sum:"Tension and resolution as note movement." },
+  { t:"py", title:"Transpose a progression", sum:"Move the whole thing to a new key with one number." },
+  { t:"both", title:"Progressions by mood", sum:"Pick changes for the feeling you want." },
+]},
+
+/* ---------- PART IV ---------- */
+{ week:13, part:4, partTitle:"Part IV — Composition &amp; Code Craft", partSub:"Model music with objects, generate it, and build something that's yours.",
+  title:"Objects: model music with classes", full:false,
+  note:"Roadmap — tap any session and I'll write it out in full, same shape as the earlier lessons.",
+  days:[
+  { t:"py", title:"Why objects fit music", sum:"Bundle a note's number with what a note can do." },
+  { t:"py", title:"A Note class", sum:"Notes that name and transpose themselves." },
+  { t:"py", title:"A Chord class", sum:"Chords from a root and quality, with methods." },
+  { t:"both", title:"Add an .arpeggio() method", sum:"Teach a chord to roll itself out melodically." },
+  { t:"py", title:"Objects working together", sum:"A Progression made of Chord objects." },
+]},
+
+{ week:14, part:4, title:"Algorithmic composition", full:false,
+  note:"Roadmap — tap any session and I'll write it out in full, same shape as the earlier lessons.",
+  days:[
+  { t:"py", title:"Weighted randomness", sum:"Give some notes more pull, so melodies have gravity." },
+  { t:"both", title:"Develop a motif", sum:"Transpose, reverse, invert a short idea into more." },
+  { t:"both", title:"Generate in a mode", sum:"Spin up riffs locked to a chosen mode." },
+  { t:"py", title:"Mutate a riff", sum:"Small random changes grow a variation." },
+  { t:"both", title:"Save the keepers", sum:"Send your best generated ideas to MIDI." },
+]},
+
+{ week:15, part:4, title:"Bigger structures &amp; recursion", full:false,
+  note:"Roadmap — tap any session and I'll write it out in full, same shape as the earlier lessons.",
+  days:[
+  { t:"both", title:"Song form as data", sum:"Lay out A/B/A sections the code assembles." },
+  { t:"both", title:"Layer the parts", sum:"Riff, chords, and bass into one multi-track score." },
+  { t:"py", title:"Meet recursion", sum:"A function that calls itself, built as a round." },
+  { t:"both", title:"Build a canon", sum:"A melody against a delayed copy of itself." },
+  { t:"both", title:"Export the whole piece", sum:"Render a full, multi-section track." },
+]},
+
+{ week:16, part:4, title:"Capstone: your tool or your song", full:false,
+  note:"Roadmap — the finish line. When you get here we'll shape it around whatever you've most enjoyed.",
+  days:[
+  { t:"both", title:"Pick your finish line", sum:"A creative tool, or an original song." },
+  { t:"both", title:"Tool path: fretboard explorer", sum:"Print and play any scale or mode on demand." },
+  { t:"both", title:"Song path: compose", sum:"An original multi-part piece using it all." },
+  { t:"both", title:"Polish", sum:"Tighten the arrangement and get the feel right." },
+  { t:"both", title:"Ship &amp; next steps", sum:"Export, add to your toolkit, choose what's next." },
+]},
+
+];
+
+/* ================= helpers ================= */
+const STORAGE_KEY = "scales-scripts-guitar-v3";
+let progress = {};
+const totalWeeks = CURRICULUM.length;
+const totalDays = CURRICULUM.reduce((a,w)=>a+w.days.length,0);
+
+function dayId(w,i){ return `w${w}d${i}`; }
+
+function tagInfo(t){
+  if(t==="py") return {cls:"py", label:"Python"};
+  if(t==="th") return {cls:"th", label:"Theory"};
+  return {cls:"both", label:"Both"};
+}
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* escape code, colour trailing comments (skip # inside a string) */
+function renderCode(codeStr){
+  return codeStr.split("\n").map(line=>{
+    const hash = line.indexOf("#");
+    if(hash > -1){
+      const before = line.slice(0, hash);
+      if(((before.match(/"/g)||[]).length) % 2 === 0){
+        return esc(before) + '<span class="cmt">' + esc(line.slice(hash)) + '</span>';
+      }
+    }
+    return esc(line);
+  }).join("\n");
+}
+
+/* ================= fretboard meter ================= */
+function drawNeck(){
+  const svg = document.getElementById('neck');
+  const x0 = 34, x1 = 610, frets = 12;
+  const span = (x1 - x0) / frets;
+  const ys = [24, 40, 56, 72, 88, 104];
+  const done = Object.values(progress).filter(Boolean).length;
+  const p = totalDays ? done / totalDays : 0;
+  const fillX = x0 + (x1 - x0) * p;
+  let s = "";
+  s += `<rect x="${x0-4}" y="16" width="${x1 - x0 + 22}" height="96" rx="6" fill="#3a2a1e" stroke="#4a3728"/>`;
+  if(p > 0) s += `<rect x="${x0-4}" y="16" width="${fillX-(x0-4)}" height="96" rx="6" fill="#c8933f" opacity="0.14"/>`;
+  for(let i=0;i<=frets;i++){
+    const x = x0 + i*span, w = i===0?4:2, col = i===0?"#d9cdb6":"#6f5a44";
+    s += `<rect x="${x-w/2}" y="18" width="${w}" height="92" fill="${col}"/>`;
+  }
+  [3,5,7,9].forEach(f=>{ s += `<circle cx="${x0+(f-0.5)*span}" cy="64" r="4.5" fill="#5a4634"/>`; });
+  const c12 = x0+(12-0.5)*span;
+  s += `<circle cx="${c12}" cy="46" r="4.5" fill="#5a4634"/><circle cx="${c12}" cy="82" r="4.5" fill="#5a4634"/>`;
+  ys.forEach((y,idx)=>{
+    s += `<line x1="${x0-4}" y1="${y}" x2="${x1+18}" y2="${y}" stroke="#c9beac" stroke-width="${2.4-idx*0.28}" opacity="0.85"/>`;
+  });
+  if(p > 0){
+    s += `<line x1="${fillX}" y1="16" x2="${fillX}" y2="112" stroke="#e6bd72" stroke-width="2.5"/>`;
+    s += `<circle cx="${fillX}" cy="64" r="7" fill="#e6bd72" opacity="0.28"/>`;
+  }
+  for(let f=1; f<=frets; f++){
+    const x = x0+(f-0.5)*span, on = (x0+f*span) <= fillX+1;
+    s += `<text x="${x}" y="128" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="${on?'#e6bd72':'#6f5a44'}">${f}</text>`;
+  }
+  svg.innerHTML = s;
+}
+
+/* ================= render ================= */
+function render(){
+  const done = Object.values(progress).filter(Boolean).length;
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('totalCount').textContent = totalDays;
+  let currentWeek = totalWeeks;
+  for(const w of CURRICULUM){
+    const d = w.days.filter((_,i)=>progress[dayId(w.week,i)]).length;
+    if(d < w.days.length){ currentWeek = w.week; break; }
+  }
+  document.getElementById('weekLabel').textContent = `Week ${currentWeek} of ${totalWeeks}`;
+  drawNeck();
+}
+
+function buildLesson(d){
+  if(d.idea){
+    let h = '<div class="lesson-inner">';
+    h += '<h4>The idea</h4>' + d.idea;
+    if(d.git) h += '<h4 class="git">On the guitar</h4>' + d.git;
+    h += '<pre><code>' + renderCode(d.code) + '</code></pre>';
+    h += `<div class="task"><span class="lbl">Try this</span><p>${d.task}</p></div>`;
+    return h + '</div>';
+  }
+  if(d.objectives){
+    let h = '<div class="lesson-inner"><h4>What you\'ll do</h4><ul class="obj">';
+    d.objectives.forEach(o=>{ h += `<li>${o}</li>`; });
+    return h + '</ul></div>';
+  }
+  return '<div class="lesson-inner"><p class="soon-note">This lesson unlocks as you reach it. When you get here, say the word and I\'ll write it out in full &mdash; <em>the idea, the guitar tie-in, code to run, and something to try</em>, exactly like the earlier sessions.</p></div>';
+}
+
+function buildWeeks(){
+  const host = document.getElementById('weeks');
+  host.innerHTML = "";
+  let counter = 0;
+
+  CURRICULUM.forEach(week=>{
+    if(week.partTitle){
+      const ph = document.createElement('div');
+      ph.className = 'part-head';
+      ph.innerHTML = `<p class="part-title">${week.partTitle}</p><p class="part-sub">${week.partSub}</p>`;
+      host.appendChild(ph);
+    }
+
+    const weekEl = document.createElement('div');
+    weekEl.className = 'week' + (week.full ? '' : ' roadmap');
+    weekEl.dataset.week = week.week;
+    const doneInWeek = week.days.filter((_,i)=>progress[dayId(week.week,i)]).length;
+
+    const head = document.createElement('button');
+    head.className = 'week-head';
+    head.setAttribute('aria-expanded','false');
+    head.innerHTML =
+      `<span class="week-head-left">
+         <span class="week-num">W${week.week}</span>
+         <span class="week-title">${week.title}</span>
+       </span>
+       <span class="week-right">
+         <span class="week-tally">${doneInWeek}/${week.days.length}</span>
+         <span class="chev">&#9656;</span>
+       </span>`;
+
+    const body = document.createElement('div');
+    body.className = 'week-body';
+
+    if(week.note){
+      const n = document.createElement('div');
+      n.className = 'roadmap-note';
+      n.textContent = week.note;
+      body.appendChild(n);
+    }
+
+    week.days.forEach((d,i)=>{
+      counter++;
+      const id = dayId(week.week,i);
+      const isDone = !!progress[id];
+      const tag = week.full ? tagInfo(d.t) : {cls:"soon", label:"Soon"};
+      const num = String(counter).padStart(2,'0');
+
+      const dayEl = document.createElement('div');
+      dayEl.className = 'day' + (isDone ? ' done' : '');
+
+      const dayHead = document.createElement('button');
+      dayHead.className = 'day-head';
+      dayHead.setAttribute('aria-expanded','false');
+      dayHead.innerHTML =
+        `<span class="check ${isDone?'done':''}" role="checkbox" aria-checked="${isDone}" aria-label="Mark session done" tabindex="0"></span>
+         <span class="day-main">
+           <span class="day-top">
+             <span class="day-idx">${num}</span>
+             <span class="tag ${tag.cls}">${tag.label}</span>
+           </span>
+           <p class="day-title">${d.title}</p>
+           <p class="day-sum">${d.sum}</p>
+         </span>
+         <span class="day-chev">&#9656;</span>`;
+
+      const lesson = document.createElement('div');
+      lesson.className = 'lesson';
+      lesson.innerHTML = buildLesson(d);
+
+      dayHead.addEventListener('click', (e)=>{
+        if(e.target.classList.contains('check')) return;
+        const open = dayEl.classList.toggle('open');
+        dayHead.setAttribute('aria-expanded', open ? 'true':'false');
+        lesson.style.maxHeight = open ? lesson.scrollHeight + 40 + "px" : 0;
+      });
+
+      const check = dayHead.querySelector('.check');
+      const toggle = (e)=>{ e.stopPropagation(); toggleDay(id); };
+      check.addEventListener('click', toggle);
+      check.addEventListener('keydown', (e)=>{
+        if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggle(e); }
+      });
+
+      dayEl.appendChild(dayHead);
+      dayEl.appendChild(lesson);
+      body.appendChild(dayEl);
+    });
+
+    head.addEventListener('click', ()=>{
+      const open = weekEl.classList.toggle('open');
+      head.setAttribute('aria-expanded', open ? 'true':'false');
+      body.style.maxHeight = open ? body.scrollHeight + "px" : 0;
+    });
+
+    weekEl.appendChild(head);
+    weekEl.appendChild(body);
+    host.appendChild(weekEl);
+  });
+}
+
+async function toggleDay(id){
+  progress[id] = !progress[id];
+  buildWeeks(); reopenState(); render();
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(progress), false); }
+  catch(err){ console.error('Could not save progress', err); }
+}
+
+let openWeek = null;
+function reopenState(){
+  if(openWeek == null) return;
+  const el = document.querySelector(`.week[data-week="${openWeek}"]`);
+  if(el){
+    el.classList.add('open');
+    el.querySelector('.week-head').setAttribute('aria-expanded','true');
+    const body = el.querySelector('.week-body');
+    body.style.maxHeight = body.scrollHeight + "px";
+  }
+}
+
+async function loadProgress(){
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(result && result.value) progress = JSON.parse(result.value);
+  }catch(err){ progress = {}; }
+  buildWeeks(); render();
+  for(const w of CURRICULUM){
+    const d = w.days.filter((_,i)=>progress[dayId(w.week,i)]).length;
+    if(d < w.days.length){ openWeek = w.week; break; }
+  }
+  if(openWeek == null) openWeek = totalWeeks;
+  reopenState();
+}
+
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  if(!confirm('Reset all progress? This clears every completed session.')) return;
+  progress = {}; openWeek = 1;
+  buildWeeks(); reopenState(); render();
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(progress), false); }
+  catch(err){ console.error('Could not reset progress', err); }
+});
+
+loadProgress();
+</script>
+</body>
+</html>
